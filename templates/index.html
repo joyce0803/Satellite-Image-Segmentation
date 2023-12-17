@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Building Detection</title>
+    <style>
+        h2 {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 70px;
+        }
+        body{
+            background-color:black;
+            color:white;
+            font-family: Poppins;
+        }
+        form{
+            display:center;
+            align:center;
+            text-align:center;
+        }
+        input[type="file"] {
+          background-color: black;
+          border: 1px solid white;
+          color: #FFFFFF;
+          padding: 8px 16px;
+          text-align: center;
+          text-decoration: none;
+          display: center;
+          align: center;
+          font-size: 16px;
+          margin-bottom: 20px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .image-container img {
+            margin: 20px;
+          }
+          p{
+            font-size:17px;
+           }
+          #imagePreview[src=""] {
+            display: none;
+          }
+          #resultImage[src=""] {
+            display: none;
+          }
+          .satellite{
+              margin-right:30px;
+              border:1px solid white;
+              height:390px;
+              width:390px;
+
+          }
+          .mask{
+              border:1px solid white;
+              height:390px;
+              width:390px;
+              margin:10px;
+          }
+          img{
+            padding-right:40px;
+           }
+          .detectButton{
+            margin:30px;
+            font-size:16px;
+            background-color: #4CAF50;
+            border: none;
+            color: #FFFFFF;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+
+            margin-bottom: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+          }
+         .detectButton:hover {
+          background-color: #3e8e41;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      #filenameLabel {
+        display: inline-block;
+      }
+      #loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 9999;
+}
+      #loading-spinner {
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #3498db;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        position: absolute;
+        top: 40%;
+        left: 45%;
+
+
+        transform: translate(-50%, -50%);
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      body.loading {
+        overflow: hidden;
+      }
+
+      button[disabled] {
+        cursor: not-allowed;
+      }
+
+      button.loading:after {
+        content: "";
+        display: inline-block;
+        width: 0.8em;
+        height: 0.8em;
+        margin-left: 0.4em;
+        border-radius: 50%;
+        border: 0.2em solid currentColor;
+        border-color: currentColor transparent transparent transparent;
+        animation: loading-spinner 0.6s linear infinite;
+      }
+
+      @keyframes loading-spinner {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+    </style>
+  </head>
+  <body>
+  <div id="loading-overlay">
+        <div id="loading-spinner"></div>
+      </div>
+    <h2 style="align:center">Detecting Buildings and Non Buildings from Satellite Images using U-Net</h2>
+    <form class="detect" method="post" enctype="multipart/form-data" onsubmit="predict()">
+      <div class="choose">
+        <label for="imageInput" class="detectButton">Choose Image</label>
+        <input type="file" class="imageInput" id="imageInput" name="imageInput" accept="image/*" onInput="previewImage(this)">
+        <label for="imageInput" id="filenameLabel">No file selected</label>
+
+      </div>
+
+  <br>
+  <br>
+  <div class="image-container">
+    <div>
+      <p>Satellite Image</p>
+        <div class="satellite">
+            <img id="imagePreview"  src="{{ image_src }}"  height="350px" width="350px">
+        </div>
+
+    </div>
+    <div>
+      <p>Segmentation Mask</p>
+        <div class="mask">
+            <img id="resultImage" src="{{ result_img }}"  height="350px" width="350px">
+        </div>
+
+    </div>
+  </div>
+  <button class="detectButton" type="submit" name="detectButton" id="predict-button" >Detect Buildings</button>
+
+</form>
+
+    <script>
+      function previewImage(input) {
+        var imagePreview = document.getElementById('imagePreview');
+        var filenameLabel = document.getElementById('filenameLabel');
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            imagePreview.setAttribute('src', e.target.result);
+            filenameLabel.innerText = input.files[0].name; // set filename label text
+          }
+          reader.readAsDataURL(input.files[0]);
+        }
+      }
+
+
+
+      function removeImage() {
+        var imageInput = document.getElementById('imageInput');
+        var imagePreview = document.getElementById('imagePreview');
+        var resultImage = document.getElementById('resultImage');
+        imageInput.value = '';
+        imagePreview.removeAttribute('src');
+        resultImage.removeAttribute('src');
+      }
+
+      var imageInput = document.getElementById('imageInput');
+      imageInput.addEventListener('change', function() {
+        previewImage(this);
+      });
+
+      function predict() {
+        var button = document.getElementById("predict-button");
+        button.classList.add("loading");
+        button.disabled = true;
+        document.body.classList.add("loading");
+        var overlay = document.getElementById("loading-overlay");
+        overlay.style.display = "block";
+        // Perform prediction here...
+        setTimeout(function() {
+          // Simulation of prediction completion.
+          button.classList.remove("loading");
+          button.disabled = false;
+          document.body.classList.remove("loading");
+          overlay.style.display = "none";
+        }, 7500);
+      }
+    </script>
+  </body>
+</html>
+
+
+
