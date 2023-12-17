@@ -6,3 +6,4 @@ By adopting an accurate and automated building detection technique using the U-N
 This will provide a quick, reliable, and efficient way to identify and map buildings in such images. 
 The project involves training the U-Net model on a dataset consisting of satellite images and their corresponding masks. After training, the model achieves exceptional accuracy and excels at handling complex shapes and patterns prevalent in satellite images. 
 This model can significantly improve the efficiency and accuracy of various applications, including urban planning, disaster response, and environmental monitoring.
+![Image](https://github.com/joyce0803/Satellite-Image-Segmentation/blob/main/example.png)
